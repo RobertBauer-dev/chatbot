@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # MongoDB für Dialog- und Eventlogs
+  mongodb:
+    image: mongo:7.0
+    container_name: chatbot-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: chatbot_db
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - chatbot-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: chatbot-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SESSION_SERVICE_URL=http://session-service:8081
+      - NLU_SERVICE_URL=http://nlu-service:8000
+    depends_on:
+      - session-service
+      - nlu-service
+    networks:
+      - chatbot-network
+
+  # Session Service
+  session-service:
+    build:
+      context: ./session-service
+      dockerfile: Dockerfile
+    container_name: chatbot-session-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/chatbot_db?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - chatbot-network
+
+  # NLU Service (Python)
+  nlu-service:
+    build:
+      context: ./nlu-service
+      dockerfile: Dockerfile
+    container_name: chatbot-nlu-service
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://admin:password123@mongodb:27017/chatbot_db?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - chatbot-network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chatbot-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080
+    depends_on:
+      - api-gateway
+    networks:
+      - chatbot-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  chatbot-network:
+    driver: bridge

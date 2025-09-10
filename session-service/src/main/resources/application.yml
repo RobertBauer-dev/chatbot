@@ -1,0 +1,22 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: session-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/chatbot_db}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.chatbot.session: DEBUG
