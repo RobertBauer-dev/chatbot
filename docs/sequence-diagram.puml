@@ -1,0 +1,35 @@
+@startuml Chat Message Processing Sequence
+
+actor User
+participant Frontend as "React Frontend"
+participant APIGateway as "API Gateway"
+participant SessionService as "Session Service"
+participant NLUService as "NLU Service"
+participant MongoDB as "MongoDB"
+
+User -> Frontend: Types message "Hello"
+Frontend -> APIGateway: POST /api/chat/message
+note right: JWT Token in Header
+
+APIGateway -> APIGateway: Validate JWT Token
+APIGateway -> SessionService: Forward request with user context
+
+SessionService -> SessionService: Create/Get Session
+SessionService -> MongoDB: Store user message
+
+SessionService -> NLUService: POST /api/nlu/classify
+note right: {"message": "Hello"}
+
+NLUService -> NLUService: Classify intent
+NLUService -> NLUService: Extract entities
+NLUService -> MongoDB: Log classification
+NLUService -> SessionService: Return intent + confidence
+
+SessionService -> SessionService: Generate bot response
+SessionService -> MongoDB: Store bot message
+SessionService -> APIGateway: Return ChatResponse
+
+APIGateway -> Frontend: Return response
+Frontend -> User: Display bot response + suggestions
+
+@enduml

@@ -415,6 +415,150 @@ Bei Fragen oder Problemen:
 - Kontaktiere das Entwicklungsteam
 - Konsultiere die API-Dokumentation
 
+## 📊 UML-Diagramme
+
+### Architektur-Diagramm (PlantUML)
+Das vollständige Architektur-Diagramm finden Sie in `docs/architecture-diagram.puml`:
+
+```plantuml
+@startuml
+// Vollständige Klassendiagramm-Definition
+// Siehe docs/architecture-diagram.puml für Details
+@enduml
+```
+
+### Sequenz-Diagramm (PlantUML)
+Das Chat-Verarbeitungs-Sequenzdiagramm finden Sie in `docs/sequence-diagram.puml`.
+
+## 🧪 Tests
+
+### Test-Übersicht
+- **Unit Tests:** Alle Services haben umfassende Unit Tests
+- **Integration Tests:** API-Gateway und Service-Integration
+- **E2E Tests:** Vollständige Benutzer-Workflows mit Selenium
+- **Security Tests:** OWASP Dependency Check und SonarQube
+
+### Test-Ausführung
+```bash
+# Alle Tests ausführen
+npm test
+
+# Spezifische Test-Suites
+npm run test:unit          # Unit Tests
+npm run test:integration   # Integration Tests  
+npm run test:e2e          # End-to-End Tests
+
+# Mit Coverage
+npm run test:frontend     # Frontend Tests mit Coverage
+npm run test:backend      # Backend Tests
+npm run test:nlu          # NLU Service Tests
+```
+
+### Test-Coverage
+- **Frontend:** Jest mit Coverage-Reporting
+- **Backend:** JaCoCo Maven Plugin
+- **NLU Service:** pytest-cov
+- **E2E:** Selenium WebDriver mit Chrome/Firefox
+
+## 🚀 CI/CD Pipeline (Jenkins)
+
+### Jenkins Setup
+```bash
+# Jenkins-Umgebung starten
+./scripts/setup-jenkins.sh
+
+# Oder manuell
+cd jenkins && docker-compose up -d
+```
+
+### Pipeline-Features
+- **Multi-Stage Pipeline:** Build → Test → Security → Deploy
+- **Parallel Execution:** Alle Services werden parallel gebaut und getestet
+- **Security Scanning:** SonarQube, OWASP Dependency Check, Trivy
+- **Docker Registry:** Automatisches Image-Building und Pushing
+- **Kubernetes Deployment:** Staging und Production Deployments
+- **Notifications:** Slack-Integration für Build-Status
+
+### Pipeline-Stages
+1. **Checkout:** Git-Repository klonen
+2. **Build & Test:** Parallel Tests für alle Services
+3. **Security Scan:** Code-Quality und Vulnerability-Scans
+4. **Build Docker Images:** Alle Services als Docker Images
+5. **Deploy to Staging:** Automatisches Staging-Deployment
+6. **Deploy to Production:** Manuell genehmigtes Production-Deployment
+7. **E2E Tests:** Vollständige End-to-End-Tests
+
+### Jenkins URLs
+- **Jenkins:** http://localhost:8080
+- **SonarQube:** http://localhost:9000
+- **Nexus:** http://localhost:8081
+
+## 🏗️ Kubernetes Deployment
+
+### Staging Environment
+```bash
+# Staging deployen
+kubectl apply -f k8s/staging/ --context=staging-cluster
+```
+
+### Production Environment
+```bash
+# Production deployen
+kubectl apply -f k8s/production/ --context=production-cluster
+```
+
+### Kubernetes Features
+- **Namespaces:** Separate Staging/Production Environments
+- **Secrets Management:** JWT-Secrets und DB-Credentials
+- **Resource Limits:** CPU/Memory Limits für alle Pods
+- **Health Checks:** Liveness und Readiness Probes
+- **Ingress:** TLS-gesicherte externe Zugriffe
+- **Security Context:** Non-root Container-Execution
+
+## 📈 Monitoring & Observability
+
+### Health Checks
+- API Gateway: `/actuator/health`
+- Session Service: `/actuator/health`
+- NLU Service: `/health`
+
+### Metrics & Analytics
+- **Application Metrics:** Spring Boot Actuator
+- **Custom Metrics:** Chat-Response-Zeiten, Intent-Confidence
+- **Business Metrics:** Session-Anzahl, Message-Volume
+
+### Logging
+- **Structured Logging:** JSON-Format für alle Services
+- **Log Aggregation:** ELK-Stack Integration (optional)
+- **Correlation IDs:** Request-Tracking über alle Services
+
+## 🔒 Security
+
+### Implementierte Sicherheitsmaßnahmen
+- **JWT Authentication:** HMAC-Signierung mit konfigurierbaren Secrets
+- **Input Validation:** Bean Validation auf allen Endpoints
+- **CORS Configuration:** Kontrollierte Cross-Origin-Requests
+- **Security Headers:** CSP, HSTS, X-Frame-Options
+- **Container Security:** Non-root Execution, Read-only Filesystems
+- **Dependency Scanning:** Automatische Vulnerability-Checks
+
+### Security Testing
+- **OWASP Dependency Check:** Automatische Dependency-Vulnerability-Scans
+- **SonarQube:** Code-Quality und Security-Hotspots
+- **Trivy:** Container-Image-Security-Scanning
+- **Penetration Testing:** Regelmäßige Security-Assessments
+
 ---
 
 **Entwickelt mit ❤️ für moderne Conversational AI Anwendungen**
+
+## 📞 Support & Kontakt
+
+- **Repository:** [GitHub Repository URL]
+- **Documentation:** [Wiki/Docs URL]
+- **Issues:** [GitHub Issues URL]
+- **Slack:** #chatbot-platform
+
+## 📄 Lizenz
+
+MIT License - siehe [LICENSE](LICENSE) für Details.

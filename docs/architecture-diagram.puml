@@ -1,0 +1,159 @@
+@startuml Conversational AI Platform Architecture
+
+!define RECTANGLE class
+
+package "Frontend Layer" {
+    class ChatInterface {
+        -messages: List<Message>
+        -inputMessage: string
+        -isLoading: boolean
+        +handleSendMessage()
+        +handleSuggestionClick()
+    }
+    
+    class LoginForm {
+        -username: string
+        -password: string
+        -isLogin: boolean
+        +handleSubmit()
+        +toggleMode()
+    }
+    
+    class AuthContext {
+        -isAuthenticated: boolean
+        -user: User
+        +login()
+        +logout()
+        +register()
+    }
+}
+
+package "API Gateway Layer" {
+    class ApiGatewayApplication {
+        +main()
+        +customRouteLocator()
+    }
+    
+    class JwtAuthenticationFilter {
+        -jwtSecret: string
+        +filter()
+        +extractToken()
+        +validateToken()
+    }
+    
+    class AuthController {
+        +login()
+        +register()
+    }
+    
+    class AuthService {
+        -users: Map<String, String>
+        +authenticate()
+        +register()
+        +generateToken()
+    }
+}
+
+package "Session Service Layer" {
+    class SessionService {
+        -sessionRepository: SessionRepository
+        +createSession()
+        +getSession()
+        +addMessageToSession()
+        +cleanupExpiredSessions()
+    }
+    
+    class ChatService {
+        -sessionService: SessionService
+        -webClient: WebClient
+        +processMessage()
+        +callNluService()
+        +generateBotResponse()
+    }
+    
+    class Session {
+        -sessionId: string
+        -userId: string
+        -messages: List<ConversationMessage>
+        -context: Map<String, Object>
+        +addMessage()
+    }
+    
+    class ConversationMessage {
+        -messageId: string
+        -content: string
+        -type: MessageType
+        -intent: string
+        -confidence: double
+    }
+}
+
+package "NLU Service Layer" {
+    class NLUService {
+        -client: AsyncIOMotorClient
+        -db: Database
+        +initialize()
+        +log_classification()
+        +get_intents()
+        +get_analytics()
+    }
+    
+    class IntentClassifier {
+        -intent_patterns: Map<String, List<String>>
+        -entity_patterns: Map<String, String>
+        +load_model()
+        +classify()
+        +_classify_intent()
+        +_extract_entities()
+    }
+    
+    class ClassificationRequest {
+        +message: string
+        +context: Map<String, Object>
+    }
+    
+    class ClassificationResponse {
+        +intent: string
+        +confidence: double
+        +entities: Map<String, Object>
+    }
+}
+
+package "Data Layer" {
+    class MongoDB {
+        +sessions: Collection
+        +conversations: Collection
+        +intents: Collection
+        +analytics: Collection
+    }
+}
+
+' Relationships
+ChatInterface --> AuthContext : uses
+LoginForm --> AuthContext : uses
+AuthContext --> AuthService : calls API
+
+AuthController --> AuthService : uses
+AuthService --> JwtAuthenticationFilter : generates token
+JwtAuthenticationFilter --> ApiGatewayApplication : filters requests
+
+ChatService --> SessionService : uses
+ChatService --> NLUService : HTTP calls
+SessionService --> MongoDB : stores sessions
+ChatService --> MongoDB : stores messages
+
+NLUService --> IntentClassifier : uses
+NLUService --> MongoDB : logs analytics
+IntentClassifier --> ClassificationRequest : processes
+IntentClassifier --> ClassificationResponse : returns
+
+Session --> ConversationMessage : contains
+ChatService --> Session : manages
+ChatService --> ConversationMessage : creates
+
+' API Gateway Routing
+ApiGatewayApplication --> SessionService : routes /api/sessions/**
+ApiGatewayApplication --> SessionService : routes /api/chat/**
+ApiGatewayApplication --> NLUService : routes /api/nlu/**
+
+@enduml

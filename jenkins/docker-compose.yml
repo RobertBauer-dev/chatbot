@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: chatbot-jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+      - JENKINS_OPTS=--httpPort=8080
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - ./jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins-network
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: chatbot-sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - jenkins-network
+
+  nexus:
+    image: sonatype/nexus3
+    container_name: chatbot-nexus
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus_data:/nexus-data
+    environment:
+      - NEXUS_SECURITY_RANDOMPASSWORD=false
+    networks:
+      - jenkins-network
+
+  selenium-hub:
+    image: selenium/hub:4.15.0
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    networks:
+      - jenkins-network
+
+  selenium-chrome:
+    image: selenium/node-chrome:4.15.0
+    container_name: selenium-chrome
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    networks:
+      - jenkins-network
+
+  selenium-firefox:
+    image: selenium/node-firefox:4.15.0
+    container_name: selenium-firefox
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+    networks:
+      - jenkins-network
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
+  nexus_data:
+
+networks:
+  jenkins-network:
+    driver: bridge

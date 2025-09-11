@@ -1,0 +1,50 @@
+{
+  "name": "chatbot-platform",
+  "version": "1.0.0",
+  "description": "Conversational AI Platform - Complete CI/CD Setup",
+  "scripts": {
+    "build": "./build.sh",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "npm run test:frontend && npm run test:backend && npm run test:nlu",
+    "test:frontend": "cd frontend && npm test -- --coverage --watchAll=false",
+    "test:backend": "cd api-gateway && mvn test && cd ../session-service && mvn test",
+    "test:nlu": "cd nlu-service && python -m pytest tests/ -v",
+    "test:integration": "npm run test:integration:api",
+    "test:integration:api": "cd tests/integration && npm test",
+    "test:e2e": "cd tests/e2e && npm test",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd api-gateway && mvn checkstyle:check && cd ../session-service && mvn checkstyle:check",
+    "security": "npm run security:backend && npm run security:frontend",
+    "security:backend": "cd api-gateway && mvn org.owasp:dependency-check-maven:check && cd ../session-service && mvn org.owasp:dependency-check-maven:check",
+    "security:frontend": "cd frontend && npm audit",
+    "setup:jenkins": "./scripts/setup-jenkins.sh",
+    "start:jenkins": "cd jenkins && docker-compose up -d",
+    "stop:jenkins": "cd jenkins && docker-compose down",
+    "deploy:staging": "kubectl apply -f k8s/staging/ --context=staging-cluster",
+    "deploy:production": "kubectl apply -f k8s/production/ --context=production-cluster",
+    "sonar": "mvn sonar:sonar -Dsonar.projectKey=chatbot-platform -Dsonar.host.url=http://localhost:9000"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "selenium-webdriver": "^4.15.0",
+    "axios": "^1.6.0",
+    "pytest": "^7.4.3",
+    "pytest-asyncio": "^0.21.1"
+  },
+  "keywords": [
+    "chatbot",
+    "conversational-ai",
+    "microservices",
+    "spring-boot",
+    "react",
+    "python",
+    "docker",
+    "kubernetes",
+    "jenkins",
+    "ci-cd"
+  ],
+  "author": "Your Organization",
+  "license": "MIT"
+}
